@@ -120,6 +120,26 @@
   cursor: not-allowed;
 }
 
+.download {
+  padding: 9px 18px;
+  border: 1.5px solid #059669;
+  border-radius: 10px;
+  background: #fff;
+  color: #059669;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.download:hover {
+  background: #ecfdf5;
+}
+
+.download:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
 .reset {
   padding: 9px 16px;
   border: 1.5px solid #e5e7eb;

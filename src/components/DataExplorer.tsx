@@ -3,6 +3,7 @@ import type { ExcelRow } from '../types/excel'
 import { ResultsTable } from './ResultsTable'
 import { ListModal } from './ListModal'
 import { FilterChips } from './FilterChips'
+import { downloadExcel } from '../utils/exportExcel'
 import { resolveRegion } from '../utils/region'
 import { REGION_GROUPS } from '../data/regions'
 import styles from './DataExplorer.module.css'
@@ -186,6 +187,13 @@ export function DataExplorer({ rows, headers }: Props) {
         <div className={styles.statusActions}>
           <button className={styles.bigView} onClick={() => setListOpen(true)} disabled={filtered.length === 0}>
             🔍 크게 보기
+          </button>
+          <button
+            className={styles.download}
+            onClick={() => downloadExcel(filtered, headers)}
+            disabled={filtered.length === 0}
+          >
+            ⬇ 엑셀 다운로드
           </button>
           {activeCount > 0 && (
             <button className={styles.reset} onClick={resetAll}>
