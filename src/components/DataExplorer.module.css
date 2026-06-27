@@ -71,11 +71,24 @@
   font-weight: 600;
 }
 
+.rangeGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-top: 6px;
+}
+
 .rangeRow {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding-left: 88px;
+}
+
+.rangeLabel {
+  width: 72px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #6b7280;
 }
 
 .rangeRow input[type='date'] {
@@ -97,6 +110,8 @@
 }
 
 .rangeClear {
+  align-self: flex-start;
+  margin-left: 82px;
   padding: 8px 12px;
   border: 1px solid #e5e7eb;
   border-radius: 8px;

@@ -19,7 +19,8 @@ interface RowWithRegion {
   group: string | null
   sigungu: string | null
   year: string | null
-  dateNum: number | null
+  dateNum: number | null // 신청일 (YYYYMMDD)
+  endDateNum: number | null // 종료 일자 (YYYYMMDD)
 }
 
 type DateMode = 'chips' | 'range'
@@ -33,6 +34,8 @@ export function DataExplorer({ rows, headers }: Props) {
   const [dateMode, setDateMode] = useState<DateMode>('chips')
   const [dateFrom, setDateFrom] = useState('')
   const [dateTo, setDateTo] = useState('')
+  const [endFrom, setEndFrom] = useState('') // 종료일자 범위
+  const [endTo, setEndTo] = useState('')
   const [status, setStatus] = useState<string[]>([]) // [] 전체 / ['정상'] / ['중지']
   const [query, setQuery] = useState('')
   const [listOpen, setListOpen] = useState(false)
@@ -48,6 +51,7 @@ export function DataExplorer({ rows, headers }: Props) {
           sigungu: r?.name ?? null,
           year: dateFilterKey(row['신청일']),
           dateNum: dateToNumber(row['신청일']),
+          endDateNum: dateToNumber(row['종료 일자']),
         }
       }),
     [rows],
@@ -117,10 +121,16 @@ export function DataExplorer({ rows, headers }: Props) {
         if (dateMode === 'chips') {
           if (years.length && !(e.year && years.includes(e.year))) return false
         } else {
-          const from = isoToNumber(dateFrom)
-          const to = isoToNumber(dateTo)
-          if (from !== null && (e.dateNum === null || e.dateNum < from)) return false
-          if (to !== null && (e.dateNum === null || e.dateNum > to)) return false
+          // 신청일 범위
+          const f = isoToNumber(dateFrom)
+          const t = isoToNumber(dateTo)
+          if (f !== null && (e.dateNum === null || e.dateNum < f)) return false
+          if (t !== null && (e.dateNum === null || e.dateNum > t)) return false
+          // 종료일자 범위 (독립적으로 조합)
+          const ef = isoToNumber(endFrom)
+          const et = isoToNumber(endTo)
+          if (ef !== null && (e.endDateNum === null || e.endDateNum < ef)) return false
+          if (et !== null && (e.endDateNum === null || e.endDateNum > et)) return false
         }
         if (status.length) {
           const stopped = Number(row['부수']) <= 0
@@ -136,7 +146,7 @@ export function DataExplorer({ rows, headers }: Props) {
         return true
       })
       .map((e) => e.row)
-  }, [enriched, newspapers, sido, sigungu, categories, years, dateMode, dateFrom, dateTo, status, query])
+  }, [enriched, newspapers, sido, sigungu, categories, years, dateMode, dateFrom, dateTo, endFrom, endTo, status, query])
 
   const stoppedCount = useMemo(() => enriched.filter((e) => Number(e.row['부수']) <= 0).length, [enriched])
 
@@ -152,7 +162,10 @@ export function DataExplorer({ rows, headers }: Props) {
     setSigungu([])
   }
 
-  const dateActive = dateMode === 'chips' ? years.length : (dateFrom ? 1 : 0) + (dateTo ? 1 : 0)
+  const dateActive =
+    dateMode === 'chips'
+      ? years.length
+      : (dateFrom ? 1 : 0) + (dateTo ? 1 : 0) + (endFrom ? 1 : 0) + (endTo ? 1 : 0)
   const activeCount =
     newspapers.length + sido.length + sigungu.length + categories.length + dateActive + status.length + (query ? 1 : 0)
 
@@ -164,6 +177,8 @@ export function DataExplorer({ rows, headers }: Props) {
     setYears([])
     setDateFrom('')
     setDateTo('')
+    setEndFrom('')
+    setEndTo('')
     setStatus([])
     setQuery('')
   }
@@ -202,13 +217,13 @@ export function DataExplorer({ rows, headers }: Props) {
 
         <div className={styles.dateBlock}>
           <div className={styles.dateHead}>
-            <span className={styles.dateTitle}>신청일</span>
+            <span className={styles.dateTitle}>날짜</span>
             <div className={styles.modeToggle}>
               <button
                 className={dateMode === 'chips' ? styles.modeOn : ''}
                 onClick={() => setDateMode('chips')}
               >
-                목록 선택
+                신청연도 선택
               </button>
               <button
                 className={dateMode === 'range' ? styles.modeOn : ''}
@@ -222,7 +237,7 @@ export function DataExplorer({ rows, headers }: Props) {
           {dateMode === 'chips' ? (
             yearOpts.list.length > 0 ? (
               <FilterChips
-                label=""
+                label="신청연도"
                 options={yearOpts.list}
                 counts={yearOpts.counts}
                 selected={years}
@@ -233,13 +248,25 @@ export function DataExplorer({ rows, headers }: Props) {
               <p className={styles.dateEmpty}>신청일 데이터가 없습니다.</p>
             )
           ) : (
-            <div className={styles.rangeRow}>
-              <input type="date" value={dateFrom} max={dateTo || undefined} onChange={(e) => setDateFrom(e.target.value)} />
-              <span className={styles.tilde}>~</span>
-              <input type="date" value={dateTo} min={dateFrom || undefined} onChange={(e) => setDateTo(e.target.value)} />
-              {(dateFrom || dateTo) && (
-                <button className={styles.rangeClear} onClick={() => { setDateFrom(''); setDateTo('') }}>
-                  지우기
+            <div className={styles.rangeGroup}>
+              <div className={styles.rangeRow}>
+                <span className={styles.rangeLabel}>신청일</span>
+                <input type="date" value={dateFrom} max={dateTo || undefined} onChange={(e) => setDateFrom(e.target.value)} />
+                <span className={styles.tilde}>~</span>
+                <input type="date" value={dateTo} min={dateFrom || undefined} onChange={(e) => setDateTo(e.target.value)} />
+              </div>
+              <div className={styles.rangeRow}>
+                <span className={styles.rangeLabel}>종료일</span>
+                <input type="date" value={endFrom} max={endTo || undefined} onChange={(e) => setEndFrom(e.target.value)} />
+                <span className={styles.tilde}>~</span>
+                <input type="date" value={endTo} min={endFrom || undefined} onChange={(e) => setEndTo(e.target.value)} />
+              </div>
+              {(dateFrom || dateTo || endFrom || endTo) && (
+                <button
+                  className={styles.rangeClear}
+                  onClick={() => { setDateFrom(''); setDateTo(''); setEndFrom(''); setEndTo('') }}
+                >
+                  날짜 지우기
                 </button>
               )}
             </div>
