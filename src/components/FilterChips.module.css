@@ -1,0 +1,87 @@
+.row {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 14px 0;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.row:last-child {
+  border-bottom: none;
+}
+
+.label {
+  flex-shrink: 0;
+  width: 72px;
+  padding-top: 8px;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #374151;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  flex: 1;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 16px;
+  border-radius: 22px;
+  border: 1.5px solid #d1d5db;
+  background: #fff;
+  color: #374151;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.12s;
+}
+
+.chip:hover {
+  border-color: #6366f1;
+  background: #f5f3ff;
+}
+
+.chip.active {
+  background: #6366f1;
+  border-color: #6366f1;
+  color: #fff;
+  font-weight: 600;
+}
+
+.allChip {
+  font-weight: 600;
+}
+
+.count {
+  font-size: 0.75rem;
+  opacity: 0.7;
+  font-weight: 500;
+}
+
+.chip.active .count {
+  opacity: 0.85;
+}
+
+/* 강조(신문사 등 핵심 필터) */
+.emphasize {
+  background: #f5f3ff;
+  border: 2px solid #c7d2fe;
+  border-radius: 12px;
+  padding: 16px 20px;
+  margin-bottom: 8px;
+}
+
+.emphasize .label {
+  color: #4338ca;
+  font-size: 1.05rem;
+}
+
+.emphasize .chip {
+  font-size: 1rem;
+  padding: 10px 18px;
+}

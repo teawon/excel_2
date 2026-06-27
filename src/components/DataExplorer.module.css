@@ -6,70 +6,94 @@
 }
 
 .head h2 {
-  font-size: 1.125rem;
+  font-size: 1.25rem;
   font-weight: 700;
   color: #111827;
 }
 
 .head p {
-  margin-top: 4px;
-  font-size: 0.8125rem;
+  margin-top: 6px;
+  font-size: 0.9rem;
   color: #6b7280;
 }
 
-.filters {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-  flex-wrap: wrap;
+.panel {
   margin: 18px 0;
-  padding: 16px;
-  background: #f9fafb;
+  padding: 8px 20px;
+  background: #fafafa;
   border: 1px solid #f3f4f6;
-  border-radius: 10px;
+  border-radius: 12px;
+}
+
+.searchRow {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 0 4px;
+}
+
+.searchLabel {
+  flex-shrink: 0;
+  width: 72px;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #374151;
 }
 
 .search {
   flex: 1;
-  min-width: 220px;
-  padding: 9px 14px;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
-  font-size: 0.875rem;
+  padding: 12px 16px;
+  border: 1.5px solid #d1d5db;
+  border-radius: 10px;
+  font-size: 1rem;
   outline: none;
   color: #111827;
 }
 
 .search:focus {
   border-color: #6366f1;
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
 }
 
-.filters select {
-  padding: 9px 12px;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
-  font-size: 0.875rem;
-  background: #fff;
-  color: #374151;
-  cursor: pointer;
-  outline: none;
+.search::placeholder {
+  color: #9ca3af;
 }
 
-.filters select:focus {
-  border-color: #6366f1;
+.statusBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
 }
 
-.clear {
-  padding: 8px 14px;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
+.resultCount {
+  font-size: 1rem;
+  color: #4b5563;
+}
+
+.resultCount strong {
+  color: #111827;
+}
+
+.hl {
+  color: #6366f1 !important;
+  font-size: 1.15rem;
+}
+
+.reset {
+  padding: 9px 16px;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 10px;
   background: #fff;
   color: #6b7280;
-  font-size: 0.8125rem;
+  font-size: 0.9rem;
+  font-weight: 500;
   cursor: pointer;
 }
 
-.clear:hover {
-  background: #f3f4f6;
+.reset:hover {
+  background: #fef2f2;
+  border-color: #fca5a5;
+  color: #ef4444;
 }
