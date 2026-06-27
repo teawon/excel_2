@@ -19,53 +19,109 @@ body {
 .app-header {
   background: #fff;
   border-bottom: 1px solid #e5e7eb;
-  padding: 20px 32px;
-}
-
-.app-header h1 {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: #6366f1;
-}
-
-.app-header p {
-  margin-top: 4px;
-  font-size: 0.875rem;
-  color: #6b7280;
-}
-
-.app-main {
-  max-width: 1200px;
-  width: 100%;
-  margin: 0 auto;
-  padding: 32px 24px;
-  flex: 1;
-}
-
-.file-info {
+  padding: 16px 32px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: #fff;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  padding: 12px 16px;
-  font-size: 0.875rem;
-  color: #374151;
+  gap: 16px;
 }
 
-.file-info button {
-  background: #6366f1;
-  color: #fff;
-  border: none;
+.app-header h1 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #6366f1;
+  white-space: nowrap;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.8125rem;
+}
+
+.sheet-badge {
+  background: #ede9fe;
+  color: #6d28d9;
+  border-radius: 20px;
+  padding: 3px 10px;
+  font-weight: 600;
+  font-size: 0.75rem;
+}
+
+.file-name {
+  color: #6b7280;
+}
+
+.btn-reset {
+  background: #f3f4f6;
+  color: #374151;
+  border: 1px solid #e5e7eb;
   border-radius: 6px;
-  padding: 6px 14px;
+  padding: 5px 12px;
   font-size: 0.8125rem;
   cursor: pointer;
 }
 
-.file-info button:hover {
-  background: #4f46e5;
+.btn-reset:hover {
+  background: #e5e7eb;
+}
+
+.tab-bar {
+  background: #fff;
+  border-bottom: 1px solid #e5e7eb;
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  overflow-x: auto;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.tab {
+  background: none;
+  border: none;
+  padding: 13px 16px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #6b7280;
+  cursor: pointer;
+  border-bottom: 2.5px solid transparent;
+  white-space: nowrap;
+  transition: color 0.15s;
+}
+
+.tab:hover {
+  color: #4f46e5;
+}
+
+.tab-active {
+  color: #4f46e5;
+  font-weight: 700;
+  border-bottom-color: #6366f1;
+}
+
+.tab-divider {
+  width: 1px;
+  height: 20px;
+  background: #e5e7eb;
+  margin: 0 6px;
+  flex-shrink: 0;
+}
+
+.app-main {
+  max-width: 1400px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 24px 24px;
+  flex: 1;
+}
+
+.upload-area {
+  max-width: 600px;
+  margin: 60px auto 0;
 }
 
 .error {

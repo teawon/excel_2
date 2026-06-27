@@ -1,0 +1,75 @@
+.scroll {
+  overflow-x: auto;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  max-height: 520px;
+  overflow-y: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8125rem;
+}
+
+.table th {
+  background: #f9fafb;
+  padding: 9px 12px;
+  text-align: center;
+  font-weight: 600;
+  color: #374151;
+  border-bottom: 1px solid #e5e7eb;
+  white-space: nowrap;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+.table td {
+  padding: 7px 12px;
+  border-bottom: 1px solid #f3f4f6;
+  color: #374151;
+  white-space: nowrap;
+}
+
+.num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.stickyGroup {
+  position: sticky;
+  left: 0;
+  background: #f5f3ff;
+  font-weight: 600;
+  color: #4338ca;
+  text-align: center;
+  vertical-align: middle;
+  border-right: 1px solid #e5e7eb;
+  z-index: 1;
+}
+
+.stickyName {
+  position: sticky;
+  left: 56px;
+  background: #fff;
+  font-weight: 500;
+}
+
+.table tbody tr:hover td {
+  background: #f9fafb;
+}
+
+.national td {
+  background: #eef2ff !important;
+  font-weight: 700;
+  color: #4338ca;
+  border-bottom: 2px solid #c7d2fe;
+}
+
+.empty {
+  padding: 32px;
+  text-align: center;
+  color: #9ca3af;
+  font-size: 0.875rem;
+}

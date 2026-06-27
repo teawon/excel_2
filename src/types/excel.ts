@@ -4,4 +4,5 @@ export interface ParsedData {
   headers: string[]
   rows: ExcelRow[]
   fileName: string
+  sheetName?: string
 }

@@ -1,0 +1,103 @@
+.wrapper {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 24px;
+}
+
+.title {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #111827;
+}
+
+.desc {
+  margin-top: 4px;
+  font-size: 0.8125rem;
+  color: #6b7280;
+}
+
+.chartBox {
+  margin: 20px 0 24px;
+}
+
+.scroll {
+  overflow-x: auto;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8125rem;
+}
+
+.table th {
+  background: #f9fafb;
+  padding: 9px 12px;
+  text-align: center;
+  font-weight: 600;
+  color: #374151;
+  border-bottom: 1px solid #e5e7eb;
+  white-space: nowrap;
+}
+
+.table th:first-child,
+.table td:first-child {
+  text-align: left;
+}
+
+.table td {
+  padding: 8px 12px;
+  border-bottom: 1px solid #f3f4f6;
+  color: #374151;
+  white-space: nowrap;
+}
+
+.num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.sticky {
+  position: sticky;
+  left: 0;
+  background: #fff;
+  font-weight: 600;
+}
+
+.table thead .sticky {
+  background: #f9fafb;
+  z-index: 1;
+}
+
+.diff {
+  color: #ef4444;
+  font-weight: 600;
+}
+
+.table tbody tr:hover td {
+  background: #f9fafb;
+}
+
+.table tbody tr:hover .sticky {
+  background: #f9fafb;
+}
+
+.table tfoot td {
+  background: #eef2ff;
+  font-weight: 700;
+  color: #4338ca;
+  border-top: 2px solid #c7d2fe;
+}
+
+.table tfoot .sticky {
+  background: #eef2ff;
+}
+
+.note {
+  margin-top: 12px;
+  font-size: 0.75rem;
+  color: #9ca3af;
+}

@@ -31,7 +31,7 @@ export function FileUploader({ onFile, loading }: Props) {
       <input
         ref={inputRef}
         type="file"
-        accept=".xlsx,.xls,.csv"
+        accept=".xlsx,.xls,.xlsm,.csv"
         onChange={handleChange}
         style={{ display: 'none' }}
       />
@@ -40,7 +40,7 @@ export function FileUploader({ onFile, loading }: Props) {
       ) : (
         <>
           <p>엑셀 파일을 드래그하거나 클릭해서 업로드</p>
-          <span>.xlsx / .xls / .csv 지원</span>
+          <span>.xlsx / .xls / .xlsm / .csv 지원</span>
         </>
       )}
     </div>
