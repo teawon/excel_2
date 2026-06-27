@@ -1,5 +1,6 @@
 import { useMemo } from 'react'
 import type { ExcelRow } from '../types/excel'
+import { buildColumns, formatCell, isStopped } from '../utils/columns'
 import styles from './ResultsTable.module.css'
 
 interface Props {
@@ -7,24 +8,8 @@ interface Props {
   headers: string[]
 }
 
-// 헤더가 비어있던 컬럼에 이름 부여
-const LABELS: Record<string, string> = {
-  __EMPTY: '비고3',
-  __EMPTY_1: '명단구분',
-}
-
-const NUMERIC_WON = new Set(['신문값'])
-
-function isStopped(row: ExcelRow): boolean {
-  return Number(row['부수']) <= 0
-}
-
 export function ResultsTable({ rows, headers }: Props) {
-  // 엑셀 정리 시트의 원래 컬럼 순서를 그대로 유지
-  const columns = useMemo(
-    () => headers.map((h) => ({ key: h, label: LABELS[h] ?? h })),
-    [headers],
-  )
+  const columns = useMemo(() => buildColumns(headers), [headers])
 
   return (
     <div className={styles.scroll}>
@@ -48,9 +33,7 @@ export function ResultsTable({ rows, headers }: Props) {
               <tr key={i} className={isStopped(row) ? styles.stopped : undefined}>
                 {columns.map((col) => (
                   <td key={col.key} className={col.key === '주소' ? styles.address : undefined}>
-                    {NUMERIC_WON.has(col.key) && typeof row[col.key] === 'number'
-                      ? `${Number(row[col.key]).toLocaleString()}원`
-                      : String(row[col.key] ?? '')}
+                    {formatCell(col.key, row[col.key])}
                   </td>
                 ))}
               </tr>

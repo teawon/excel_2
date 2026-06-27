@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import type { ExcelRow } from '../types/excel'
 import { ResultsTable } from './ResultsTable'
+import { ListModal } from './ListModal'
 import { FilterChips } from './FilterChips'
 import { resolveRegion } from '../utils/region'
 import { REGION_GROUPS } from '../data/regions'
@@ -24,6 +25,7 @@ export function DataExplorer({ rows, headers }: Props) {
   const [categories, setCategories] = useState<string[]>([])
   const [status, setStatus] = useState<string[]>([]) // [] 전체 / ['정상'] / ['중지']
   const [query, setQuery] = useState('')
+  const [listOpen, setListOpen] = useState(false)
 
   // 각 행의 지역을 1회 분류 (주소 → 시도/시군구)
   const enriched = useMemo<RowWithRegion[]>(
@@ -181,14 +183,23 @@ export function DataExplorer({ rows, headers }: Props) {
             신문값 합계 <strong>{totalAmount.toLocaleString()}원</strong>
           </span>
         </div>
-        {activeCount > 0 && (
-          <button className={styles.reset} onClick={resetAll}>
-            ✕ 필터 초기화 ({activeCount})
+        <div className={styles.statusActions}>
+          <button className={styles.bigView} onClick={() => setListOpen(true)} disabled={filtered.length === 0}>
+            🔍 크게 보기
           </button>
-        )}
+          {activeCount > 0 && (
+            <button className={styles.reset} onClick={resetAll}>
+              ✕ 필터 초기화 ({activeCount})
+            </button>
+          )}
+        </div>
       </div>
 
       <ResultsTable rows={filtered} headers={headers} />
+
+      {listOpen && (
+        <ListModal rows={filtered} headers={headers} onClose={() => setListOpen(false)} />
+      )}
     </div>
   )
 }

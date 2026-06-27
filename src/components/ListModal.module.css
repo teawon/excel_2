@@ -1,0 +1,163 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(17, 24, 39, 0.5);
+  display: flex;
+  z-index: 200;
+}
+
+.modal {
+  background: #f9fafb;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 18px 24px;
+  background: #fff;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #111827;
+  white-space: nowrap;
+}
+
+.count {
+  color: #6366f1;
+  margin-left: 6px;
+}
+
+.search {
+  flex: 1;
+  padding: 10px 14px;
+  border: 1.5px solid #d1d5db;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  outline: none;
+}
+
+.search:focus {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
+}
+
+.close {
+  flex-shrink: 0;
+  width: 38px;
+  height: 38px;
+  border: none;
+  background: #f3f4f6;
+  border-radius: 10px;
+  font-size: 1rem;
+  color: #6b7280;
+  cursor: pointer;
+}
+
+.close:hover {
+  background: #e5e7eb;
+  color: #374151;
+}
+
+.body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.card {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 16px 20px;
+}
+
+.card.stopped {
+  background: #fafafa;
+  border-color: #f3f4f6;
+}
+
+.card.stopped .cardTitle {
+  color: #9ca3af;
+}
+
+.cardHead {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.cardTitle {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #111827;
+}
+
+.tag {
+  background: #ede9fe;
+  color: #6d28d9;
+  border-radius: 14px;
+  padding: 3px 11px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.stopTag {
+  background: #f3f4f6;
+  color: #9ca3af;
+}
+
+.grid {
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 10px 24px;
+}
+
+.field {
+  display: flex;
+  gap: 10px;
+  align-items: baseline;
+  min-width: 0;
+}
+
+.label {
+  flex-shrink: 0;
+  width: 88px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #6b7280;
+}
+
+.value {
+  margin: 0;
+  flex: 1;
+  font-size: 0.95rem;
+  color: #111827;
+  word-break: break-word;
+  min-width: 0;
+}
+
+.muted {
+  color: #d1d5db;
+}
+
+.empty {
+  text-align: center;
+  color: #9ca3af;
+  padding: 60px;
+}
