@@ -31,7 +31,7 @@ export function DataExplorer({ rows, headers }: Props) {
   const [sigungu, setSigungu] = useState<string[]>([])
   const [categories, setCategories] = useState<string[]>([])
   const [years, setYears] = useState<string[]>([])
-  const [dateMode, setDateMode] = useState<DateMode>('chips')
+  const [dateMode, setDateMode] = useState<DateMode>('range')
   const [dateFrom, setDateFrom] = useState('')
   const [dateTo, setDateTo] = useState('')
   const [endFrom, setEndFrom] = useState('') // 종료일자 범위
@@ -220,16 +220,16 @@ export function DataExplorer({ rows, headers }: Props) {
             <span className={styles.dateTitle}>날짜</span>
             <div className={styles.modeToggle}>
               <button
-                className={dateMode === 'chips' ? styles.modeOn : ''}
-                onClick={() => setDateMode('chips')}
-              >
-                신청연도 선택
-              </button>
-              <button
                 className={dateMode === 'range' ? styles.modeOn : ''}
                 onClick={() => setDateMode('range')}
               >
                 기간 지정
+              </button>
+              <button
+                className={dateMode === 'chips' ? styles.modeOn : ''}
+                onClick={() => setDateMode('chips')}
+              >
+                신청연도 선택
               </button>
             </div>
           </div>
