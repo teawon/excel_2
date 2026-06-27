@@ -1,49 +1,7 @@
-.wrapper {
-  margin-top: 0;
-}
-
-.meta {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 10px;
-  font-size: 0.875rem;
-  color: #6b7280;
-}
-
-.meta strong {
-  color: #111827;
-}
-
-.pagination {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 0.875rem;
-  color: #374151;
-}
-
-.pagination button {
-  background: #fff;
-  border: 1px solid #e5e7eb;
-  border-radius: 6px;
-  padding: 4px 10px;
-  cursor: pointer;
-  font-size: 1rem;
-  line-height: 1;
-}
-
-.pagination button:disabled {
-  opacity: 0.3;
-  cursor: not-allowed;
-}
-
-.pagination button:not(:disabled):hover {
-  background: #f3f4f6;
-}
-
 .scroll {
-  overflow-x: auto;
+  overflow: auto;
+  max-height: calc(100vh - 360px);
+  min-height: 240px;
   border-radius: 10px;
   border: 1px solid #e5e7eb;
   background: #fff;
@@ -57,14 +15,15 @@
 
 .table th {
   background: #f9fafb;
-  padding: 10px 12px;
+  padding: 11px 12px;
   text-align: left;
   font-weight: 600;
   color: #374151;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 2px solid #e5e7eb;
   white-space: nowrap;
   position: sticky;
   top: 0;
+  z-index: 1;
 }
 
 .table td {
@@ -89,6 +48,20 @@
 
 .table tr:hover td {
   background: #f9fafb;
+}
+
+/* 중지(부수=0) 행 - 가볍게 흐리게 표시 */
+.stopped td {
+  background: #fafafa;
+  color: #9ca3af;
+}
+
+.stopped td:first-child {
+  position: relative;
+}
+
+.stopped:hover td {
+  background: #f3f4f6;
 }
 
 .empty {

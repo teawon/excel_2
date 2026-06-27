@@ -23,8 +23,8 @@ export function FileUploader({ onFile, loading }: Props) {
 
   return (
     <div
-      className={styles.dropzone}
-      onClick={() => inputRef.current?.click()}
+      className={`${styles.dropzone} ${loading ? styles.loading : ''}`}
+      onClick={() => !loading && inputRef.current?.click()}
       onDrop={handleDrop}
       onDragOver={(e) => e.preventDefault()}
     >
@@ -36,11 +36,16 @@ export function FileUploader({ onFile, loading }: Props) {
         style={{ display: 'none' }}
       />
       {loading ? (
-        <p>파일 파싱 중...</p>
+        <>
+          <div className={styles.spinner} />
+          <p className={styles.title}>분석 중입니다...</p>
+          <span className={styles.sub}>잠시만 기다려 주세요</span>
+        </>
       ) : (
         <>
-          <p>엑셀 파일을 드래그하거나 클릭해서 업로드</p>
-          <span>.xlsx / .xls / .xlsm / .csv 지원</span>
+          <div className={styles.icon}>📄</div>
+          <p className={styles.title}>여기에 엑셀 파일을 올려주세요</p>
+          <span className={styles.sub}>파일을 끌어다 놓거나, 눌러서 선택하세요</span>
         </>
       )}
     </div>

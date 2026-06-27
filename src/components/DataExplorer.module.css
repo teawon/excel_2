@@ -81,6 +81,18 @@
   font-size: 1.15rem;
 }
 
+.amount {
+  margin-left: 16px;
+  padding-left: 16px;
+  border-left: 1px solid #e5e7eb;
+  color: #6b7280;
+}
+
+.amount strong {
+  color: #059669;
+  font-size: 1.1rem;
+}
+
 .reset {
   padding: 9px 16px;
   border: 1.5px solid #e5e7eb;

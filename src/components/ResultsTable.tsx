@@ -1,81 +1,63 @@
-import { useState } from 'react'
+import { useMemo } from 'react'
 import type { ExcelRow } from '../types/excel'
 import styles from './ResultsTable.module.css'
 
-const COLUMNS: { key: string; label: string }[] = [
-  { key: '연번', label: '연번' },
-  { key: '신문사', label: '신문사' },
-  { key: '고객명', label: '고객명' },
-  { key: '주소', label: '주소' },
-  { key: '분류', label: '분류' },
-  { key: '납부방법', label: '납부방법' },
-  { key: '부수', label: '부수' },
-  { key: '신문값', label: '신문값' },
-  { key: '신청일', label: '신청일' },
-  { key: '중지일', label: '중지일' },
-  { key: '전화번호', label: '전화번호' },
-  { key: '휴대폰', label: '휴대폰' },
-  { key: '비고', label: '비고' },
-]
-
-const PAGE_SIZE = 50
-
 interface Props {
   rows: ExcelRow[]
-  total: number
+  headers: string[]
 }
 
-export function ResultsTable({ rows, total }: Props) {
-  const [page, setPage] = useState(1)
-  const pageCount = Math.ceil(rows.length / PAGE_SIZE)
-  const paged = rows.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
+// 헤더가 비어있던 컬럼에 이름 부여
+const LABELS: Record<string, string> = {
+  __EMPTY: '비고3',
+  __EMPTY_1: '명단구분',
+}
+
+const NUMERIC_WON = new Set(['신문값'])
+
+function isStopped(row: ExcelRow): boolean {
+  return Number(row['부수']) <= 0
+}
+
+export function ResultsTable({ rows, headers }: Props) {
+  // 엑셀 정리 시트의 원래 컬럼 순서를 그대로 유지
+  const columns = useMemo(
+    () => headers.map((h) => ({ key: h, label: LABELS[h] ?? h })),
+    [headers],
+  )
 
   return (
-    <div className={styles.wrapper}>
-      <div className={styles.meta}>
-        <span>
-          전체 <strong>{total}</strong>건 중 <strong>{rows.length}</strong>건 검색됨
-        </span>
-        {pageCount > 1 && (
-          <div className={styles.pagination}>
-            <button disabled={page === 1} onClick={() => setPage(page - 1)}>‹</button>
-            <span>{page} / {pageCount}</span>
-            <button disabled={page === pageCount} onClick={() => setPage(page + 1)}>›</button>
-          </div>
-        )}
-      </div>
-      <div className={styles.scroll}>
-        <table className={styles.table}>
-          <thead>
+    <div className={styles.scroll}>
+      <table className={styles.table}>
+        <thead>
+          <tr>
+            {columns.map((col) => (
+              <th key={col.key}>{col.label}</th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {rows.length === 0 ? (
             <tr>
-              {COLUMNS.map((col) => (
-                <th key={col.key}>{col.label}</th>
-              ))}
+              <td colSpan={columns.length} className={styles.empty}>
+                검색 결과가 없습니다.
+              </td>
             </tr>
-          </thead>
-          <tbody>
-            {paged.length === 0 ? (
-              <tr>
-                <td colSpan={COLUMNS.length} className={styles.empty}>
-                  검색 결과가 없습니다.
-                </td>
+          ) : (
+            rows.map((row, i) => (
+              <tr key={i} className={isStopped(row) ? styles.stopped : undefined}>
+                {columns.map((col) => (
+                  <td key={col.key} className={col.key === '주소' ? styles.address : undefined}>
+                    {NUMERIC_WON.has(col.key) && typeof row[col.key] === 'number'
+                      ? `${Number(row[col.key]).toLocaleString()}원`
+                      : String(row[col.key] ?? '')}
+                  </td>
+                ))}
               </tr>
-            ) : (
-              paged.map((row, i) => (
-                <tr key={i}>
-                  {COLUMNS.map((col) => (
-                    <td key={col.key} className={col.key === '주소' ? styles.address : undefined}>
-                      {col.key === '신문값' && typeof row[col.key] === 'number'
-                        ? `${Number(row[col.key]).toLocaleString()}원`
-                        : String(row[col.key] ?? '')}
-                    </td>
-                  ))}
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
+            ))
+          )}
+        </tbody>
+      </table>
     </div>
   )
 }

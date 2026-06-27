@@ -8,6 +8,7 @@ import styles from './DataExplorer.module.css'
 
 interface Props {
   rows: ExcelRow[]
+  headers: string[]
 }
 
 interface RowWithRegion {
@@ -16,11 +17,12 @@ interface RowWithRegion {
   sigungu: string | null
 }
 
-export function DataExplorer({ rows }: Props) {
+export function DataExplorer({ rows, headers }: Props) {
   const [newspapers, setNewspapers] = useState<string[]>([])
   const [sido, setSido] = useState<string[]>([]) // 단일 선택 (배열로 관리)
   const [sigungu, setSigungu] = useState<string[]>([])
   const [categories, setCategories] = useState<string[]>([])
+  const [status, setStatus] = useState<string[]>([]) // [] 전체 / ['정상'] / ['중지']
   const [query, setQuery] = useState('')
 
   // 각 행의 지역을 1회 분류 (주소 → 시도/시군구)
@@ -76,6 +78,11 @@ export function DataExplorer({ rows }: Props) {
         if (sido.length && !(e.group && sido.includes(e.group))) return false
         if (sigungu.length && !(e.sigungu && sigungu.includes(e.sigungu))) return false
         if (categories.length && !categories.includes(String(row['분류'] ?? ''))) return false
+        if (status.length) {
+          const stopped = Number(row['부수']) <= 0
+          if (status[0] === '중지' && !stopped) return false
+          if (status[0] === '정상' && stopped) return false
+        }
         if (q) {
           const name = String(row['고객명'] ?? '').toLowerCase()
           const addr = String(row['주소'] ?? '').toLowerCase()
@@ -85,7 +92,15 @@ export function DataExplorer({ rows }: Props) {
         return true
       })
       .map((e) => e.row)
-  }, [enriched, newspapers, sido, sigungu, categories, query])
+  }, [enriched, newspapers, sido, sigungu, categories, status, query])
+
+  const stoppedCount = useMemo(() => enriched.filter((e) => Number(e.row['부수']) <= 0).length, [enriched])
+
+  // 검색 결과 신문값 총액
+  const totalAmount = useMemo(
+    () => filtered.reduce((sum, row) => sum + (Number(row['신문값']) || 0), 0),
+    [filtered],
+  )
 
   // 시도 변경 시 시군구 초기화
   const onSidoChange = (next: string[]) => {
@@ -94,13 +109,14 @@ export function DataExplorer({ rows }: Props) {
   }
 
   const activeCount =
-    newspapers.length + sido.length + sigungu.length + categories.length + (query ? 1 : 0)
+    newspapers.length + sido.length + sigungu.length + categories.length + status.length + (query ? 1 : 0)
 
   const resetAll = () => {
     setNewspapers([])
     setSido([])
     setSigungu([])
     setCategories([])
+    setStatus([])
     setQuery('')
   }
 
@@ -136,6 +152,15 @@ export function DataExplorer({ rows }: Props) {
 
         <FilterChips label="분류" options={categoryOpts} selected={categories} onChange={setCategories} multi />
 
+        <FilterChips
+          label="상태"
+          options={['정상', '중지']}
+          counts={{ 정상: rows.length - stoppedCount, 중지: stoppedCount }}
+          selected={status}
+          onChange={setStatus}
+          multi={false}
+        />
+
         <div className={styles.searchRow}>
           <div className={styles.searchLabel}>검색</div>
           <input
@@ -152,6 +177,9 @@ export function DataExplorer({ rows }: Props) {
         <div className={styles.resultCount}>
           전체 <strong>{rows.length.toLocaleString()}</strong>건 중{' '}
           <strong className={styles.hl}>{filtered.length.toLocaleString()}</strong>건
+          <span className={styles.amount}>
+            신문값 합계 <strong>{totalAmount.toLocaleString()}원</strong>
+          </span>
         </div>
         {activeCount > 0 && (
           <button className={styles.reset} onClick={resetAll}>
@@ -160,7 +188,7 @@ export function DataExplorer({ rows }: Props) {
         )}
       </div>
 
-      <ResultsTable rows={filtered} total={rows.length} />
+      <ResultsTable rows={filtered} headers={headers} />
     </div>
   )
 }
