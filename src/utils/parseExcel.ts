@@ -3,9 +3,13 @@ import type { ParsedData } from '../types/excel'
 
 const PREFERRED_SHEET = '정리'
 
+// 엑셀 날짜(serial) → 'YYYY.MM.DD' (정렬·연도추출이 쉬운 형식)
 function excelSerialToDate(serial: number): string {
   const date = new Date(Math.round((serial - 25569) * 86400 * 1000))
-  return date.toLocaleDateString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit' })
+  const y = date.getUTCFullYear()
+  const m = String(date.getUTCMonth() + 1).padStart(2, '0')
+  const d = String(date.getUTCDate()).padStart(2, '0')
+  return `${y}.${m}.${d}`
 }
 
 const DATE_COLUMNS = new Set(['신청일', '중지일', '종료 일자'])

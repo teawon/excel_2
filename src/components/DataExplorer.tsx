@@ -4,6 +4,7 @@ import { ResultsTable } from './ResultsTable'
 import { ListModal } from './ListModal'
 import { FilterChips } from './FilterChips'
 import { downloadExcel } from '../utils/exportExcel'
+import { dateFilterKey } from '../utils/columns'
 import { resolveRegion } from '../utils/region'
 import { REGION_GROUPS } from '../data/regions'
 import styles from './DataExplorer.module.css'
@@ -17,6 +18,7 @@ interface RowWithRegion {
   row: ExcelRow
   group: string | null
   sigungu: string | null
+  year: string | null
 }
 
 export function DataExplorer({ rows, headers }: Props) {
@@ -24,16 +26,17 @@ export function DataExplorer({ rows, headers }: Props) {
   const [sido, setSido] = useState<string[]>([]) // 단일 선택 (배열로 관리)
   const [sigungu, setSigungu] = useState<string[]>([])
   const [categories, setCategories] = useState<string[]>([])
+  const [years, setYears] = useState<string[]>([])
   const [status, setStatus] = useState<string[]>([]) // [] 전체 / ['정상'] / ['중지']
   const [query, setQuery] = useState('')
   const [listOpen, setListOpen] = useState(false)
 
-  // 각 행의 지역을 1회 분류 (주소 → 시도/시군구)
+  // 각 행의 지역(주소→시도/시군구) + 신청연도를 1회 계산
   const enriched = useMemo<RowWithRegion[]>(
     () =>
       rows.map((row) => {
         const r = resolveRegion(row['주소'])
-        return { row, group: r?.group ?? null, sigungu: r?.name ?? null }
+        return { row, group: r?.group ?? null, sigungu: r?.name ?? null, year: dateFilterKey(row['신청일']) }
       }),
     [rows],
   )
@@ -72,6 +75,23 @@ export function DataExplorer({ rows, headers }: Props) {
     return Object.keys(counts).sort((a, b) => counts[b] - counts[a])
   }, [enriched])
 
+  const yearOpts = useMemo(() => {
+    const counts: Record<string, number> = {}
+    for (const e of enriched) {
+      if (e.year) counts[e.year] = (counts[e.year] || 0) + 1
+    }
+    // 연도(4자리 숫자)를 먼저 오름차순, 그 뒤에 '기존' 등 텍스트 값을 가나다순
+    const list = Object.keys(counts).sort((a, b) => {
+      const na = /^\d{4}$/.test(a)
+      const nb = /^\d{4}$/.test(b)
+      if (na && nb) return Number(a) - Number(b)
+      if (na) return -1
+      if (nb) return 1
+      return a.localeCompare(b, 'ko')
+    })
+    return { list, counts }
+  }, [enriched])
+
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase()
     return enriched
@@ -81,6 +101,7 @@ export function DataExplorer({ rows, headers }: Props) {
         if (sido.length && !(e.group && sido.includes(e.group))) return false
         if (sigungu.length && !(e.sigungu && sigungu.includes(e.sigungu))) return false
         if (categories.length && !categories.includes(String(row['분류'] ?? ''))) return false
+        if (years.length && !(e.year && years.includes(e.year))) return false
         if (status.length) {
           const stopped = Number(row['부수']) <= 0
           if (status[0] === '중지' && !stopped) return false
@@ -95,7 +116,7 @@ export function DataExplorer({ rows, headers }: Props) {
         return true
       })
       .map((e) => e.row)
-  }, [enriched, newspapers, sido, sigungu, categories, status, query])
+  }, [enriched, newspapers, sido, sigungu, categories, years, status, query])
 
   const stoppedCount = useMemo(() => enriched.filter((e) => Number(e.row['부수']) <= 0).length, [enriched])
 
@@ -112,13 +133,14 @@ export function DataExplorer({ rows, headers }: Props) {
   }
 
   const activeCount =
-    newspapers.length + sido.length + sigungu.length + categories.length + status.length + (query ? 1 : 0)
+    newspapers.length + sido.length + sigungu.length + categories.length + years.length + status.length + (query ? 1 : 0)
 
   const resetAll = () => {
     setNewspapers([])
     setSido([])
     setSigungu([])
     setCategories([])
+    setYears([])
     setStatus([])
     setQuery('')
   }
@@ -154,6 +176,17 @@ export function DataExplorer({ rows, headers }: Props) {
         )}
 
         <FilterChips label="분류" options={categoryOpts} selected={categories} onChange={setCategories} multi />
+
+        {yearOpts.list.length > 0 && (
+          <FilterChips
+            label="신청연도"
+            options={yearOpts.list}
+            counts={yearOpts.counts}
+            selected={years}
+            onChange={setYears}
+            multi
+          />
+        )}
 
         <FilterChips
           label="상태"

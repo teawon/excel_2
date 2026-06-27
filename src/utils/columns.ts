@@ -28,3 +28,14 @@ export function formatCell(key: string, value: ExcelRow[string]): string {
 export function isStopped(row: ExcelRow): boolean {
   return Number(row['부수']) <= 0
 }
+
+// 신청일을 필터용 값으로 변환.
+// - 날짜('YYYY.MM.DD')면 연도('YYYY')
+// - 날짜가 아닌 입력값('기존' 등)이면 그 값 그대로
+// - 비어있으면 null (필터 옵션에서 제외)
+export function dateFilterKey(value: ExcelRow[string]): string | null {
+  const s = String(value ?? '').trim()
+  if (!s) return null
+  const m = /^(\d{4})\./.exec(s)
+  return m ? m[1] : s
+}
