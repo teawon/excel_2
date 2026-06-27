@@ -1,30 +1,25 @@
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import { useExcelParser } from './hooks/useExcelParser'
 import { FileUploader } from './components/FileUploader'
-import { OverallStats } from './components/OverallStats'
-import { NewspaperDetail } from './components/NewspaperDetail'
+import { DataExplorer } from './components/DataExplorer'
+import { StatisticsView } from './components/StatisticsView'
 import './App.css'
 
-const OVERALL = '__overall__'
+type MainTab = 'data' | 'stats'
 
 function App() {
   const { data, loading, error, parse, reset } = useExcelParser()
-  const [activeTab, setActiveTab] = useState<string>(OVERALL)
-
-  const newspapers = useMemo(() => {
-    if (!data) return []
-    return [...new Set(data.rows.map((r) => String(r['신문사'] ?? '')).filter(Boolean))].sort()
-  }, [data])
+  const [tab, setTab] = useState<MainTab>('data')
 
   const handleNewFile = () => {
     reset()
-    setActiveTab(OVERALL)
+    setTab('data')
   }
 
   return (
     <div className="app">
       <header className="app-header">
-        <h1>📊 지방지 통계 분석</h1>
+        <h1>📊 지방지 데이터 분석</h1>
         {data && (
           <div className="header-right">
             <span className="sheet-badge">{data.sheetName ?? ''} 시트</span>
@@ -37,21 +32,17 @@ function App() {
       {data && (
         <nav className="tab-bar">
           <button
-            className={`tab ${activeTab === OVERALL ? 'tab-active' : ''}`}
-            onClick={() => setActiveTab(OVERALL)}
+            className={`tab ${tab === 'data' ? 'tab-active' : ''}`}
+            onClick={() => setTab('data')}
           >
-            📈 전체 통계
+            📋 데이터 조회
           </button>
-          <div className="tab-divider" />
-          {newspapers.map((paper) => (
-            <button
-              key={paper}
-              className={`tab ${activeTab === paper ? 'tab-active' : ''}`}
-              onClick={() => setActiveTab(paper)}
-            >
-              {paper}
-            </button>
-          ))}
+          <button
+            className={`tab ${tab === 'stats' ? 'tab-active' : ''}`}
+            onClick={() => setTab('stats')}
+          >
+            📊 통계
+          </button>
         </nav>
       )}
 
@@ -61,10 +52,10 @@ function App() {
             <FileUploader onFile={parse} loading={loading} />
             {error && <p className="error">{error}</p>}
           </div>
-        ) : activeTab === OVERALL ? (
-          <OverallStats rows={data.rows} />
+        ) : tab === 'data' ? (
+          <DataExplorer rows={data.rows} />
         ) : (
-          <NewspaperDetail rows={data.rows} newspaper={activeTab} />
+          <StatisticsView rows={data.rows} />
         )}
       </main>
     </div>

@@ -23,5 +23,4 @@ dist-ssr
 *.sln
 *.sw?
 
-# 고객 PII 포함 - 절대 커밋 금지
-excel_data/
+sample/*

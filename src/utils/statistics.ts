@@ -1,10 +1,11 @@
 import type { ExcelRow } from '../types/excel'
 import { REGIONS, REGION_GROUPS } from '../data/regions'
 
-// 통계표 카테고리 = 정리!분류(E) 값에 대한 SUMIFS 패턴.
-// '*' 는 와일드카드 (본사* → 본사/본사수금/본사이체, 지로* → 지로/지로1년선납...).
+// 통계표 카테고리 = 정리!분류(E) 값에 대한 SUMIFS 기준.
+// '*' 는 와일드카드. (본사* → 본사/본사수금/본사이체, 지로* → 지로/지로1년선납...)
+// 유가는 현재 데이터엔 없지만(분류값에 정확히 "유가" 없음) 추후 생길 수 있어 컬럼을 유지.
 export interface CategoryDef {
-  key: string // 매칭 패턴 (와일드카드 포함)
+  key: string // 매칭 패턴 (와일드카드 포함 가능)
   label: string // 화면 표시용
 }
 
@@ -15,6 +16,7 @@ export const CATEGORIES: CategoryDef[] = [
   { key: '우편', label: '우편' },
   { key: '이체', label: '이체' },
   { key: '지로*', label: '지로' },
+  { key: '유가', label: '유가' },
   { key: '투입*유*', label: '투입(유)' },
   { key: '투입*무*', label: '투입(무)' },
   { key: '카드*', label: '카드' },
@@ -27,24 +29,43 @@ const FIELD = {
   address: '주소',
 } as const
 
-// Excel SUMIFS 와일드카드 매칭: "*"&pattern&"*" 와 동일하게 동작.
-// pattern 을 '*' 기준으로 나눠, 각 조각이 순서대로 포함되는지 확인.
-export function wildcardMatch(value: unknown, pattern: string): boolean {
+function escapeRegex(s: string): string {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+}
+
+// 분류 카테고리 매칭 = Excel SUMIFS 텍스트 기준 의미.
+// 와일드카드 없으면 정확 일치(예: '이체'는 '본사이체'를 잡지 않음),
+// '*' 가 있으면 해당 위치에 임의 문자열 허용하고 앞뒤로 앵커링(예: '본사*' = 본사로 시작).
+export function categoryMatch(value: unknown, pattern: string): boolean {
   const str = String(value ?? '')
-  const segs = pattern.split('*').filter(Boolean)
-  if (segs.length === 0) return true
-  let idx = 0
-  for (const seg of segs) {
-    const found = str.indexOf(seg, idx)
-    if (found < 0) return false
-    idx = found + seg.length
-  }
-  return true
+  const re = new RegExp('^' + pattern.split('*').map(escapeRegex).join('.*') + '$')
+  return re.test(str)
+}
+
+// 주소(지역) 매칭 = 원본 수식 "*"&패턴&"*" 의미 = 부분 포함.
+// 패턴 내부의 '*' 도 와일드카드(예: '서울*중구' = 주소에 '서울' 다음 '중구' 포함).
+export function addressMatch(value: unknown, pattern: string): boolean {
+  const str = String(value ?? '')
+  const re = new RegExp(pattern.split('*').map(escapeRegex).join('.*'))
+  return re.test(str)
 }
 
 function busu(row: ExcelRow): number {
   const v = Number(row[FIELD.count])
   return Number.isFinite(v) ? v : 0
+}
+
+function sumByCategories(rows: ExcelRow[]): { byCategory: Record<string, number>; sum: number } {
+  const byCategory: Record<string, number> = {}
+  let sum = 0
+  for (const cat of CATEGORIES) {
+    const v = rows
+      .filter((r) => categoryMatch(r[FIELD.category], cat.key))
+      .reduce((a, r) => a + busu(r), 0)
+    byCategory[cat.key] = v
+    sum += v
+  }
+  return { byCategory, sum }
 }
 
 export interface NewspaperStat {
@@ -61,15 +82,7 @@ export function computeOverallStats(rows: ExcelRow[]): NewspaperStat[] {
   return papers.map((paper) => {
     const prs = rows.filter((r) => String(r[FIELD.newspaper] ?? '') === paper)
     const total = prs.reduce((a, r) => a + busu(r), 0)
-    const byCategory: Record<string, number> = {}
-    let sum = 0
-    for (const cat of CATEGORIES) {
-      const v = prs
-        .filter((r) => wildcardMatch(r[FIELD.category], cat.key))
-        .reduce((a, r) => a + busu(r), 0)
-      byCategory[cat.key] = v
-      sum += v
-    }
+    const { byCategory, sum } = sumByCategories(prs)
     return { newspaper: paper, total, byCategory, sum, diff: sum - total }
   })
 }
@@ -91,24 +104,12 @@ export interface RegionStats {
 export function computeRegionStats(rows: ExcelRow[], newspaper: string): RegionStats {
   const prs = rows.filter((r) => String(r[FIELD.newspaper] ?? '') === newspaper)
 
-  const calcRow = (filterFn: (r: ExcelRow) => boolean): { byCategory: Record<string, number>; sum: number } => {
-    const subset = prs.filter(filterFn)
-    const byCategory: Record<string, number> = {}
-    let sum = 0
-    for (const cat of CATEGORIES) {
-      const v = subset
-        .filter((r) => wildcardMatch(r[FIELD.category], cat.key))
-        .reduce((a, r) => a + busu(r), 0)
-      byCategory[cat.key] = v
-      sum += v
-    }
-    return { byCategory, sum }
-  }
-
-  const national: RegionStatRow = { group: '전국', name: '전국', ...calcRow(() => true) }
+  const nat = sumByCategories(prs)
+  const national: RegionStatRow = { group: '전국', name: '전국', byCategory: nat.byCategory, sum: nat.sum }
 
   const regionRows: RegionStatRow[] = REGIONS.map((region) => {
-    const { byCategory, sum } = calcRow((r) => wildcardMatch(r[FIELD.address], region.pattern))
+    const subset = prs.filter((r) => addressMatch(r[FIELD.address], region.pattern))
+    const { byCategory, sum } = sumByCategories(subset)
     return { group: region.group, name: region.name, byCategory, sum }
   }).filter((r) => r.sum > 0) // 데이터 있는 지역만
 
