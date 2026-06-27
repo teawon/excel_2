@@ -4,7 +4,7 @@ import { ResultsTable } from './ResultsTable'
 import { ListModal } from './ListModal'
 import { FilterChips } from './FilterChips'
 import { downloadExcel } from '../utils/exportExcel'
-import { dateFilterKey } from '../utils/columns'
+import { dateFilterKey, dateToNumber, isoToNumber } from '../utils/columns'
 import { resolveRegion } from '../utils/region'
 import { REGION_GROUPS } from '../data/regions'
 import styles from './DataExplorer.module.css'
@@ -19,7 +19,10 @@ interface RowWithRegion {
   group: string | null
   sigungu: string | null
   year: string | null
+  dateNum: number | null
 }
+
+type DateMode = 'chips' | 'range'
 
 export function DataExplorer({ rows, headers }: Props) {
   const [newspapers, setNewspapers] = useState<string[]>([])
@@ -27,16 +30,25 @@ export function DataExplorer({ rows, headers }: Props) {
   const [sigungu, setSigungu] = useState<string[]>([])
   const [categories, setCategories] = useState<string[]>([])
   const [years, setYears] = useState<string[]>([])
+  const [dateMode, setDateMode] = useState<DateMode>('chips')
+  const [dateFrom, setDateFrom] = useState('')
+  const [dateTo, setDateTo] = useState('')
   const [status, setStatus] = useState<string[]>([]) // [] 전체 / ['정상'] / ['중지']
   const [query, setQuery] = useState('')
   const [listOpen, setListOpen] = useState(false)
 
-  // 각 행의 지역(주소→시도/시군구) + 신청연도를 1회 계산
+  // 각 행의 지역(주소→시도/시군구) + 신청일(연도키/숫자)을 1회 계산
   const enriched = useMemo<RowWithRegion[]>(
     () =>
       rows.map((row) => {
         const r = resolveRegion(row['주소'])
-        return { row, group: r?.group ?? null, sigungu: r?.name ?? null, year: dateFilterKey(row['신청일']) }
+        return {
+          row,
+          group: r?.group ?? null,
+          sigungu: r?.name ?? null,
+          year: dateFilterKey(row['신청일']),
+          dateNum: dateToNumber(row['신청일']),
+        }
       }),
     [rows],
   )
@@ -101,7 +113,15 @@ export function DataExplorer({ rows, headers }: Props) {
         if (sido.length && !(e.group && sido.includes(e.group))) return false
         if (sigungu.length && !(e.sigungu && sigungu.includes(e.sigungu))) return false
         if (categories.length && !categories.includes(String(row['분류'] ?? ''))) return false
-        if (years.length && !(e.year && years.includes(e.year))) return false
+        // 신청일: 칩(연도/값) 모드 vs 기간 지정 모드
+        if (dateMode === 'chips') {
+          if (years.length && !(e.year && years.includes(e.year))) return false
+        } else {
+          const from = isoToNumber(dateFrom)
+          const to = isoToNumber(dateTo)
+          if (from !== null && (e.dateNum === null || e.dateNum < from)) return false
+          if (to !== null && (e.dateNum === null || e.dateNum > to)) return false
+        }
         if (status.length) {
           const stopped = Number(row['부수']) <= 0
           if (status[0] === '중지' && !stopped) return false
@@ -116,7 +136,7 @@ export function DataExplorer({ rows, headers }: Props) {
         return true
       })
       .map((e) => e.row)
-  }, [enriched, newspapers, sido, sigungu, categories, years, status, query])
+  }, [enriched, newspapers, sido, sigungu, categories, years, dateMode, dateFrom, dateTo, status, query])
 
   const stoppedCount = useMemo(() => enriched.filter((e) => Number(e.row['부수']) <= 0).length, [enriched])
 
@@ -132,8 +152,9 @@ export function DataExplorer({ rows, headers }: Props) {
     setSigungu([])
   }
 
+  const dateActive = dateMode === 'chips' ? years.length : (dateFrom ? 1 : 0) + (dateTo ? 1 : 0)
   const activeCount =
-    newspapers.length + sido.length + sigungu.length + categories.length + years.length + status.length + (query ? 1 : 0)
+    newspapers.length + sido.length + sigungu.length + categories.length + dateActive + status.length + (query ? 1 : 0)
 
   const resetAll = () => {
     setNewspapers([])
@@ -141,6 +162,8 @@ export function DataExplorer({ rows, headers }: Props) {
     setSigungu([])
     setCategories([])
     setYears([])
+    setDateFrom('')
+    setDateTo('')
     setStatus([])
     setQuery('')
   }
@@ -177,16 +200,51 @@ export function DataExplorer({ rows, headers }: Props) {
 
         <FilterChips label="분류" options={categoryOpts} selected={categories} onChange={setCategories} multi />
 
-        {yearOpts.list.length > 0 && (
-          <FilterChips
-            label="신청연도"
-            options={yearOpts.list}
-            counts={yearOpts.counts}
-            selected={years}
-            onChange={setYears}
-            multi
-          />
-        )}
+        <div className={styles.dateBlock}>
+          <div className={styles.dateHead}>
+            <span className={styles.dateTitle}>신청일</span>
+            <div className={styles.modeToggle}>
+              <button
+                className={dateMode === 'chips' ? styles.modeOn : ''}
+                onClick={() => setDateMode('chips')}
+              >
+                목록 선택
+              </button>
+              <button
+                className={dateMode === 'range' ? styles.modeOn : ''}
+                onClick={() => setDateMode('range')}
+              >
+                기간 지정
+              </button>
+            </div>
+          </div>
+
+          {dateMode === 'chips' ? (
+            yearOpts.list.length > 0 ? (
+              <FilterChips
+                label=""
+                options={yearOpts.list}
+                counts={yearOpts.counts}
+                selected={years}
+                onChange={setYears}
+                multi
+              />
+            ) : (
+              <p className={styles.dateEmpty}>신청일 데이터가 없습니다.</p>
+            )
+          ) : (
+            <div className={styles.rangeRow}>
+              <input type="date" value={dateFrom} max={dateTo || undefined} onChange={(e) => setDateFrom(e.target.value)} />
+              <span className={styles.tilde}>~</span>
+              <input type="date" value={dateTo} min={dateFrom || undefined} onChange={(e) => setDateTo(e.target.value)} />
+              {(dateFrom || dateTo) && (
+                <button className={styles.rangeClear} onClick={() => { setDateFrom(''); setDateTo('') }}>
+                  지우기
+                </button>
+              )}
+            </div>
+          )}
+        </div>
 
         <FilterChips
           label="상태"

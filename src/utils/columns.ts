@@ -39,3 +39,16 @@ export function dateFilterKey(value: ExcelRow[string]): string | null {
   const m = /^(\d{4})\./.exec(s)
   return m ? m[1] : s
 }
+
+// 'YYYY.MM.DD' 신청일을 비교 가능한 숫자(YYYYMMDD)로. 날짜 아니면 null.
+export function dateToNumber(value: ExcelRow[string]): number | null {
+  const m = /^(\d{4})\.(\d{2})\.(\d{2})/.exec(String(value ?? '').trim())
+  return m ? Number(m[1] + m[2] + m[3]) : null
+}
+
+// 'YYYY-MM-DD'(날짜 입력값) → YYYYMMDD 숫자. 비어있으면 null.
+export function isoToNumber(iso: string): number | null {
+  if (!iso) return null
+  const n = Number(iso.replace(/-/g, ''))
+  return Number.isFinite(n) ? n : null
+}
