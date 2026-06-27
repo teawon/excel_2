@@ -2,13 +2,15 @@ import { useMemo } from 'react'
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts'
 import type { ExcelRow } from '../types/excel'
 import { CATEGORIES, computeOverallStats } from '../utils/statistics'
+import { DataQualityPanel } from './DataQualityPanel'
 import styles from './OverallStats.module.css'
 
 interface Props {
   rows: ExcelRow[]
+  headers: string[]
 }
 
-export function OverallStats({ rows }: Props) {
+export function OverallStats({ rows, headers }: Props) {
   const stats = useMemo(() => computeOverallStats(rows), [rows])
 
   const totals = useMemo(() => {
@@ -90,8 +92,10 @@ export function OverallStats({ rows }: Props) {
         </table>
       </div>
       <p className={styles.note}>
-        ※ <strong>차</strong> = 합계 − 총부수. 중지·향토지 등 9개 카테고리에 속하지 않는 부수입니다.
+        ※ <strong>차</strong> = 합계 − 총부수. 중지·향토지 등 카테고리에 속하지 않는 부수입니다.
       </p>
+
+      <DataQualityPanel rows={rows} headers={headers} />
     </div>
   )
 }

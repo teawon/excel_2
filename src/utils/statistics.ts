@@ -87,6 +87,49 @@ export function computeOverallStats(rows: ExcelRow[]): NewspaperStat[] {
   })
 }
 
+export interface UnclassifiedGroup {
+  category: string // 분류 값 (없으면 '(분류 없음)')
+  count: number // 행 수
+  busuSum: number // 부수 합계 (통계에서 누락된 양)
+}
+
+export interface UnclassifiedResult {
+  groups: UnclassifiedGroup[]
+  rows: ExcelRow[]
+  totalCount: number
+  totalBusu: number
+}
+
+// 어떤 카테고리에도 속하지 않는(통계에 집계되지 않는) 분류값을 찾는다.
+// '중지'처럼 부수 0인 값은 통계에 영향이 없지만, 부수>0 인데 미분류면 데이터 오류 가능성.
+export function findUnclassified(rows: ExcelRow[]): UnclassifiedResult {
+  const isClassified = (row: ExcelRow) =>
+    CATEGORIES.some((c) => categoryMatch(row[FIELD.category], c.key))
+
+  const bad = rows.filter((r) => !isClassified(r))
+
+  const map = new Map<string, { count: number; busu: number }>()
+  for (const r of bad) {
+    const raw = r[FIELD.category]
+    const key = raw == null || String(raw).trim() === '' ? '(분류 없음)' : String(raw)
+    const g = map.get(key) ?? { count: 0, busu: 0 }
+    g.count += 1
+    g.busu += busu(r)
+    map.set(key, g)
+  }
+
+  const groups = [...map.entries()]
+    .map(([category, v]) => ({ category, count: v.count, busuSum: v.busu }))
+    .sort((a, b) => b.busuSum - a.busuSum || b.count - a.count)
+
+  return {
+    groups,
+    rows: bad,
+    totalCount: bad.length,
+    totalBusu: bad.reduce((a, r) => a + busu(r), 0),
+  }
+}
+
 export interface RegionStatRow {
   group: string
   name: string

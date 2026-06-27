@@ -56,7 +56,7 @@ function App() {
             {tab === 'data' ? (
               <DataExplorer rows={data.rows} headers={data.headers} />
             ) : (
-              <StatisticsView rows={data.rows} />
+              <StatisticsView rows={data.rows} headers={data.headers} />
             )}
           </main>
         </>

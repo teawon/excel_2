@@ -6,11 +6,12 @@ import styles from './StatisticsView.module.css'
 
 interface Props {
   rows: ExcelRow[]
+  headers: string[]
 }
 
 const OVERALL = '__overall__'
 
-export function StatisticsView({ rows }: Props) {
+export function StatisticsView({ rows, headers }: Props) {
   const [view, setView] = useState<string>(OVERALL)
 
   const newspapers = useMemo(
@@ -40,7 +41,7 @@ export function StatisticsView({ rows }: Props) {
       </div>
 
       {view === OVERALL ? (
-        <OverallStats rows={rows} />
+        <OverallStats rows={rows} headers={headers} />
       ) : (
         <div className={styles.regionBox}>
           <div className={styles.regionHead}>

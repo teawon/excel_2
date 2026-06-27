@@ -7,13 +7,14 @@ interface Props {
   rows: ExcelRow[]
   headers: string[]
   onClose: () => void
+  title?: string
 }
 
 // 카드 제목/태그로 따로 빼는 컬럼 (본문 그리드에서는 제외)
 const TITLE_KEY = '고객명'
 const TAG_KEY = '신문사'
 
-export function ListModal({ rows, headers, onClose }: Props) {
+export function ListModal({ rows, headers, onClose, title = '전체 목록' }: Props) {
   const [query, setQuery] = useState('')
   const columns = useMemo(
     () => buildColumns(headers).filter((c) => c.key !== TITLE_KEY && c.key !== TAG_KEY),
@@ -48,7 +49,7 @@ export function ListModal({ rows, headers, onClose }: Props) {
       <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
         <div className={styles.header}>
           <h3 className={styles.title}>
-            전체 목록 <span className={styles.count}>{visible.length.toLocaleString()}건</span>
+            {title} <span className={styles.count}>{visible.length.toLocaleString()}건</span>
           </h3>
           <input
             className={styles.search}
